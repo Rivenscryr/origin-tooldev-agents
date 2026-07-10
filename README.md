@@ -28,7 +28,7 @@ tells the agent what it may not build, why, and what to do instead.
   & polling, automatically registered alarms/notifications/webhooks, drastic shortcuts
   & direct probing, imitating Dark Matter features, blocking monetization, paywalls,
   and silent data scraping.
-- The **gray areas** that require prior ToolDev approval.
+- The **gray areas** that require prior approval.
 - API and background-call discipline: use the community proxy, page-load-only calls,
   the `accountInfo` and `cp` gotchas, and what "activity" is and why it matters.
 - A **"does my tool even need toleration?"** decision guide.
@@ -44,7 +44,7 @@ tells the agent what it may not build, why, and what to do instead.
    *"Read `AGENTS.md` and follow it strictly."*
 3. Build your tool. When you ask for something forbidden, the agent should refuse and
    explain — **don't override it.** If you believe you have a legitimate exception, ask
-   a ToolDev on the forum *before* proceeding.
+   a ToolDev admin on the forum *before* proceeding.
 
 ### What it looks like in practice
 
@@ -55,7 +55,7 @@ tells the agent what it may not build, why, and what to do instead.
 > Discord or webhooks. Tools that do this get rejected. There's no compliant version
 > of auto-detecting attacks; the closest allowed thing is a notification *you* set by
 > hand on a specific fleet you sent. If you think your case is an exception, check with
-> a ToolDev on the forum before we build anything.
+> a ToolDev admin on the forum before we build anything.
 
 ## Important — what this is and isn't
 
@@ -66,7 +66,7 @@ tells the agent what it may not build, why, and what to do instead.
 - ❌ It is **not a substitute for the official rules.** The forum threads are the
   source of truth; this file only encodes them for your agent.
 - ⚠️ AI agents make mistakes. Read what your agent produces, and when in doubt,
-  **ask a ToolDev.**
+  **ask a ToolDev admin.**
 
 ## Useful links
 
@@ -85,7 +85,7 @@ a rule has changed or an example is unclear.
 **Please note:** this file only *encodes* the rules; it does not set them. Any change
 that alters what is or isn't allowed must reflect an actual decision by the OGame
 Origin ToolDev team, not a contributor's preference. When in doubt, open an issue
-first and let a ToolDev weigh in.
+first and let a ToolDev admin weigh in.
 
 ## Maintainers
 
