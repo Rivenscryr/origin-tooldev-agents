@@ -89,4 +89,4 @@ first and let a ToolDev weigh in.
 
 ## Maintainers
 
-_Maintained by the OGame Origin ToolDev community._
+[RiV-](https://forum.origin.ogame.gameforge.com/user/16-riv/) (Origin ToolDev Administrator)
