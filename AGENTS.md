@@ -69,8 +69,9 @@ trigger at most one game action.**
 **Why:** OGame forbids automating gameplay. "1 click = 1 action" is the bright line.
 
 ### 1.2 Scheduling and delayed actions
-- ❌ "Send this fleet in 4 hours." ❌ "Queue this attack for tonight." ❌ Any timer
-  that fires a game action later.
+- ❌ "Send this fleet in 4 hours."
+- ❌ "Queue this attack for tonight."
+- ❌ Any timer that fires a game action later.
 
 **Why:** Delayed or scheduled execution of game actions is explicitly forbidden.
 
