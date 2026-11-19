@@ -1,0 +1,5 @@
+# OGame Request Guard releases. One row per released version, tab-separated.
+# status: current | accepted (until the date in "until") | withdrawn (fails at once, e.g. a security hole)
+# A tool's guard is accepted only if its SHA-256 is on a row that is current, or accepted and not past "until".
+version	sha256	status	until
+1.0.0	ef8d4c200da1e54e05f23815db033d41d24638d2a4e27fb3f5ae0af0d119af5f	current	
