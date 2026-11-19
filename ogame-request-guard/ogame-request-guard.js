@@ -322,6 +322,10 @@
     if (spec.path !== undefined) {
       const path = text(spec.path, 'path', tool);
       if (code(path, 0) !== 47 || indexOf(path, '?') >= 0) throw new OGameRequestGuardError(tool, `path ${path} must be a bare path`);
+      // As a bare path, the game's router would match every page, component and action: declare those instead.
+      if (indexOf(lower(path), '/game/index.php') === 0) {
+        throw new OGameRequestGuardError(tool, `${path} is the game's router: declare page, component and action instead of a path`);
+      }
       const api = isApiPath(path);
       if (api && method !== 'GET' && method !== 'HEAD') throw new OGameRequestGuardError(tool, `${path} is the public API: GET or HEAD only`);
       if (api && spec.series !== undefined) throw new OGameRequestGuardError(tool, `${path} is the public API: it takes no trigger, so no series`);

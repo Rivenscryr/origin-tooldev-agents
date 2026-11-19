@@ -2,4 +2,4 @@
 # status: current | accepted (until the date in "until") | withdrawn (fails at once, e.g. a security hole)
 # A tool's guard is accepted only if its SHA-256 is on a row that is current, or accepted and not past "until".
 version	sha256	status	until
-1.0.0	a35409950d9b8f515521de863ec84ca9864eb6b763c472cfa2c115173726f5ef	current	
+1.0.0	8e2c19020b13902fe2e6bfd39d136ed3dc8ca700200ff4060e84a119ac1408e1	current	
