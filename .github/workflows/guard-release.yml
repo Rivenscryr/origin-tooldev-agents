@@ -1,0 +1,67 @@
+# Releases the OGame Request Guard (ogame-request-guard/). Its check script is .github/scripts/guard-release.mjs.
+#
+# On a pull request that touches the guard folder: the check runs, nothing is released, so a refusal shows
+# before the merge. On a push to master: the check runs, and if the guard's version is new, a release
+# guard-v<version> is created on that commit, with the guard and its types attached and the hash in the notes.
+name: Guard release
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'ogame-request-guard/**'
+      - '.github/scripts/guard-release.mjs'
+      - '.github/workflows/guard-release.yml'
+  pull_request:
+    paths:
+      - 'ogame-request-guard/**'
+      - '.github/scripts/guard-release.mjs'
+      - '.github/workflows/guard-release.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      release: ${{ steps.check.outputs.release }}
+      tag: ${{ steps.check.outputs.tag }}
+      version: ${{ steps.check.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # the tags, to compare an existing release's guard
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - id: check
+        run: node .github/scripts/guard-release.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: guard-release-notes
+          path: ${{ runner.temp }}/guard-release-notes.md
+
+  release:
+    needs: check
+    if: github.event_name == 'push' && needs.check.outputs.release == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: guard-release-notes
+          path: ${{ runner.temp }}
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.check.outputs.tag }}
+          VERSION: ${{ needs.check.outputs.version }}
+        run: |
+          gh release create "$TAG" \
+            ogame-request-guard/ogame-request-guard.js \
+            ogame-request-guard/ogame-request-guard.d.ts \
+            --target "$GITHUB_SHA" \
+            --title "OGame Request Guard $VERSION" \
+            --notes-file "$RUNNER_TEMP/guard-release-notes.md"
