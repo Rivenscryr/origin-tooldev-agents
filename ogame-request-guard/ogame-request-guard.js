@@ -322,8 +322,16 @@
     if (spec.path !== undefined) {
       const path = text(spec.path, 'path', tool);
       if (code(path, 0) !== 47 || indexOf(path, '?') >= 0) throw new OGameRequestGuardError(tool, `path ${path} must be a bare path`);
-      // As a bare path, the game's router would match every page, component and action: declare those instead.
-      if (indexOf(lower(path), '/game/index.php') === 0) {
+      // Plain characters only: the server decodes %xx and folds // and dot segments, which an exact match does not.
+      for (let i = 0; i < path.length; i += 1) {
+        const c = code(path, i);
+        const plain = (c >= 48 && c <= 57) || (c >= 65 && c <= 90) || (c >= 97 && c <= 122) || c === 45 || c === 46 || c === 47 || c === 95;
+        if (!plain) throw new OGameRequestGuardError(tool, `path ${path} may hold only letters, digits, '-', '_', '.' and '/'`);
+      }
+      if (indexOf(path, '//') >= 0 || indexOf(path, '/.') >= 0) throw new OGameRequestGuardError(tool, `path ${path} may not hold '//' or a segment starting with '.'`);
+      // Anything under /game reaches the game's router, which as a bare path would match every page, component and
+      // action (/game/ is served by index.php too): those are declared by page, component and action only.
+      if (indexOf(lower(path), '/game') === 0) {
         throw new OGameRequestGuardError(tool, `${path} is the game's router: declare page, component and action instead of a path`);
       }
       const api = isApiPath(path);

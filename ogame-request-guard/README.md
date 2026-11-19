@@ -12,7 +12,7 @@ This keeps the rule on background calls and polling (Forbidden Features, categor
 | `ogame-request-guard.d.ts` | TypeScript types, optional. |
 | `ogame-request-guard.releases.tsv` | Every released version with its SHA-256, and whether it is current, accepted until a date, or withdrawn. |
 
-Published in the `ogame-request-guard/` folder of https://github.com/Rivenscryr/origin-tooldev-agents, beside this guide, with the current hash: `8e2c19020b13902fe2e6bfd39d136ed3dc8ca700200ff4060e84a119ac1408e1`.
+Published in the `ogame-request-guard/` folder of https://github.com/Rivenscryr/origin-tooldev-agents, beside this guide, with the current hash: `ef8d4c200da1e54e05f23815db033d41d24638d2a4e27fb3f5ae0af0d119af5f`.
 
 ## Rules
 
@@ -68,7 +68,7 @@ Load the guard with `@require` from its release tag, with the published hash aft
 // ==UserScript==
 // @name         My Tool
 // @match        https://*.ogame.gameforge.com/game/*
-// @require      https://raw.githubusercontent.com/Rivenscryr/origin-tooldev-agents/guard-v1.0.0/ogame-request-guard/ogame-request-guard.js#sha256=8e2c19020b13902fe2e6bfd39d136ed3dc8ca700200ff4060e84a119ac1408e1
+// @require      https://raw.githubusercontent.com/Rivenscryr/origin-tooldev-agents/guard-v1.0.0/ogame-request-guard/ogame-request-guard.js#sha256=ef8d4c200da1e54e05f23815db033d41d24638d2a4e27fb3f5ae0af0d119af5f
 // @grant        GM_info
 // ==/UserScript==
 ```
