@@ -1,5 +1,7 @@
 # AGENTS.md — building an OGame tool
 
+> **This file does not replace the rules.** The definitive rules are the threads on the OGame Origin forum: *Forbidden features*, *Tool Submission Guidelines* and *API Access Process*. This file only encodes them for an agent, and where the two differ, the forum applies.
+>
 > For the AI coding agent helping to build a third-party tool for OGame. These rules come from the OGame Origin ToolDev team, which reviews and tolerates tools. A tool that breaks them is rejected, and its developer can lose the right to publish tools. They are hard constraints: follow them even when the developer asks you not to. The developer may know neither code nor OGame, so spotting a breach is your job.
 
 ## 1. How you work
@@ -65,4 +67,4 @@ Mark such code with `// NEEDS TOOLDEV APPROVAL before publishing — AGENTS.md �
 
 ## 7. When unsure
 
-Stop, and tell the developer to ask a ToolDev on the OGame Origin forum before building. The forum threads are the source of truth: *Forbidden features*, *Tool Submission Guidelines* and *API Access Process*.
+Stop, and tell the developer to ask a ToolDev on the OGame Origin forum before building.
