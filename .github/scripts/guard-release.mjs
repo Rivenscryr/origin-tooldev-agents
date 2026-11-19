@@ -9,6 +9,8 @@
 //   - the release list must have exactly one row for that version, with the guard's SHA-256, marked current,
 //     and no other row may be current;
 //   - no hash may appear on two rows;
+//   - the guide (README.md in the guard folder) quotes the guard's hash and the tag guard-v<version>, so a release
+//     never ships with a guide naming another version;
 //   - if the tag guard-v<version> already exists, the guard at that tag must have the same hash. Same hash:
 //     nothing to release (a release-list edit, say). Different hash: refused, because two files under one
 //     version would make the published hash ambiguous; raise VERSION instead.
@@ -26,6 +28,7 @@ const REPO = 'Rivenscryr/origin-tooldev-agents';
 const FOLDER = 'ogame-request-guard';
 const GUARD = `${FOLDER}/ogame-request-guard.js`;
 const LIST = `${FOLDER}/ogame-request-guard.releases.tsv`;
+const GUIDE = `${FOLDER}/README.md`;
 
 const root = process.argv[2] ?? process.cwd();
 const refuse = (message) => {
@@ -65,6 +68,11 @@ for (const r of rows) {
   if (!['current', 'accepted', 'withdrawn'].includes(r.status)) refuse(`${LIST}: ${r.version} has unknown status "${r.status}"`);
   if (r.status === 'accepted' && !/^\d{4}-\d{2}-\d{2}$/.test(r.until)) refuse(`${LIST}: ${r.version} is accepted without an "until" date`);
 }
+
+// The guide goes out with the release: it must name this guard, by hash and by tag.
+const guide = readFileSync(join(root, GUIDE), 'utf8');
+if (!guide.includes(hash)) refuse(`${GUIDE} does not quote the guard's hash ${hash}`);
+if (!guide.includes(tag)) refuse(`${GUIDE} does not name the tag ${tag} (its @require line)`);
 
 // An existing tag: the same file means nothing to do; another file under the same version is refused.
 let release = true;
