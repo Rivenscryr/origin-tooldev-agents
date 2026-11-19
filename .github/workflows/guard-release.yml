@@ -1,7 +1,7 @@
 # Releases the OGame Request Guard (ogame-request-guard/). Its check script is .github/scripts/guard-release.mjs.
 #
-# On a pull request that touches the guard folder: the check runs, nothing is released, so a refusal shows
-# before the merge. On a push to master: the check runs, and if the guard's version is new, a release
+# On a pull request into master that touches the guard folder: the check runs, nothing is released, so a refusal
+# shows before the merge. On a push to master: the check runs, and if the guard's version is new, a release
 # guard-v<version> is created on that commit, with the guard, its types and its guide attached and the hash in the notes.
 name: Guard release
 
@@ -13,6 +13,9 @@ on:
       - '.github/scripts/guard-release.mjs'
       - '.github/workflows/guard-release.yml'
   pull_request:
+    # Only the release PR (dev into master): guard changes merged into dev mid-batch do not yet match the release
+    # list and the README, which are brought up to date in the PR that releases them.
+    branches: [master]
     paths:
       - 'ogame-request-guard/**'
       - '.github/scripts/guard-release.mjs'

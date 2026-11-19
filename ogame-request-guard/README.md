@@ -121,7 +121,7 @@ button.addEventListener('click', (event) => {
 
 The event must be one the player caused: `click`, `dblclick`, `auxclick`, `contextmenu`, mouse or pointer down and up, touch start and end, key down and up. Events your code dispatches, and events like `load`, `focus`, `input` or `submit`, do not count.
 
-**Each event allows one request per endpoint.** Two different endpoints from one click are fine; the same endpoint twice is refused.
+**Each press allows one request per endpoint.** A press is one click, tap or key press, with every event it fires: pointer, touch and mouse down and up, then the click. They share one budget, so listening to several of them still sends once. Two different endpoints from one press are fine; the same endpoint twice is refused. Each repeat of a held key is a press of its own.
 
 ### When you await something first: tickets
 
@@ -203,7 +203,7 @@ Every refusal throws an `OGameRequestGuardError` before anything is sent. **Log 
 | `not declared` | The URL, method or `action` is not in your declaration | Declare it with a reason, or correct the URL or method |
 | `must be OGameRequestGuard.PAGE_LOAD, a ticket, or a real user-input event` | No trigger, a dispatched event, or an event that does not count | Request from a click or key handler, or on page load |
 | `must be used while it is being handled` | The event was used after an `await` or later | Take `guard.ticket(event)` before the first `await` |
-| `already requested for this event` / `on this page load` | That endpoint was already requested on this trigger | One request per endpoint per trigger, unless it is an approved series |
+| `already requested for this press` / `on this page load` | That endpoint was already requested on this trigger | One request per endpoint per trigger, unless it is an approved series |
 | `only valid for 3 s` / `ticket is older than 10 s` | Too late | Request sooner after the page load or the click |
 | `never from a background` | Request under `/game/` from a background or worker | Make it from your content script, in response to the player |
 | `goes through fetchApi()` | A path under `/api/` through `fetch` | Use `guard.fetchApi(url)` |

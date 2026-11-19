@@ -14,8 +14,11 @@
  *     declared, and only with a trigger: OGameRequestGuard.PAGE_LOAD in the first seconds after the page loaded, or
  *     a real user-input event (click, key, pointer, touch) while it is being handled. An event kept for later is
  *     refused. Code that awaits something first takes guard.ticket(event) while the event is being handled and
- *     passes the ticket instead: it is valid for ten seconds. Each click allows one request per declared
- *     endpoint, whether made directly or with its ticket. A timer has no trigger, so it cannot request.
+ *     passes the ticket instead: it is valid for ten seconds. Each press allows one request per declared
+ *     endpoint, whether made directly or with its ticket. A press is every event of one click, tap or key press
+ *     (pointer, touch and mouse down and up, then click): they share one budget, so a tool listening to several
+ *     of them still sends once. Each repeat of a held key is a press of its own. A timer has no trigger, so it
+ *     cannot request.
  *   - An endpoint declared with series: n allows up to n requests per click instead of one, for a batching
  *     feature ToolDev granted as an exception. Requests of a series are at least 100 ms apart; the first comes
  *     within the ticket's ten seconds, each later one within ten seconds of the one before, or the rest lapses.
@@ -41,7 +44,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '1.0.0';
+  const VERSION = '1.1.0';
   const root = globalThis;
 
   // Loaded twice in one world (two userscripts with @grant none share the page's world): the first one stays.
@@ -128,6 +131,8 @@
   /** Room for a storage read and the tool's start-up, short enough that a timer gains next to nothing. */
   const PAGE_LOAD_WINDOW_MS = 3_000;
   const TICKET_MS = 10_000;
+  /** The longest a press lasts: events of one click, tap or key press later than this start a new one. */
+  const PRESS_MS = 10_000;
   /** A declared series: the least time between two of its requests, and the most before the rest lapses. */
   const SERIES_GAP_MS = 100;
   const SERIES_LAPSE_MS = 10_000;
@@ -163,8 +168,12 @@
   const tools = new Set();
   /** Spent per endpoint key, so a second create() under another name buys nothing. */
   const spentOnLoad = new Set();
-  /** Event → Map(endpoint key → { count, last }): how many requests it made and when the last one went. */
-  const spentOnEvent = new WeakMap();
+  /** Press → Map(endpoint key → { count, last }): how many requests it made and when the last one went. */
+  const spentOnPress = new WeakMap();
+  /** Event → the press it belongs to. */
+  const pressOfEvent = new WeakMap();
+  /** The press under way: { start, closed }, or null. */
+  let currentPress = null;
   /** Ticket → { event, expires }. A ticket spends its event's budget, so it adds no request of its own. */
   const tickets = new WeakMap();
 
@@ -302,6 +311,42 @@
     return readEvent(isTrustedGetter, event) === true && apply(SetHas, USER_INPUT, [readEvent(eventTypeGetter, event)]);
   }
 
+  /**
+   * The press a real input event belongs to. pointerdown and keydown start one: every mouse, touch and pen
+   * sequence opens with pointerdown, and each repeat of a held key is a keydown. touchstart and mousedown join an
+   * open press (the mouse events a browser adds after a tap among them); up events, contextmenu and dblclick join
+   * the latest; click and auxclick join an open press and close it. Anything later than PRESS_MS, or with no press
+   * to join, starts a new one. Recorded once per event, whether the guard's listener or a request sees it first.
+   */
+  function pressOf(event) {
+    const known = apply(WeakMapGet, pressOfEvent, [event]);
+    if (known) return known;
+    const type = readEvent(eventTypeGetter, event);
+    const t = now();
+    const fresh = currentPress !== null && t - currentPress.start <= PRESS_MS;
+    let joins;
+    if (type === 'pointerdown' || type === 'keydown') joins = false;
+    else if (type === 'touchstart' || type === 'mousedown' || type === 'click' || type === 'auxclick') joins = fresh && !currentPress.closed;
+    else joins = fresh;
+    if (!joins) currentPress = { start: t, closed: false };
+    const press = currentPress;
+    if (type === 'click' || type === 'auxclick') press.closed = true;
+    apply(WeakMapSet, pressOfEvent, [event, press]);
+    return press;
+  }
+
+  // Every real input event on the page is placed in its press as it happens, before the tool's own handlers see
+  // it where the guard's listener runs first. Passive: it only records.
+  const addListener = root.addEventListener;
+  if (onPage && typeof addListener === 'function') {
+    const track = (event) => {
+      if (readEvent(isTrustedGetter, event) === true) pressOf(event);
+    };
+    const options = freeze({ capture: true, passive: true });
+    const types = ['pointerdown', 'pointerup', 'mousedown', 'mouseup', 'touchstart', 'touchend', 'click', 'dblclick', 'auxclick', 'contextmenu', 'keydown', 'keyup'];
+    for (let i = 0; i < types.length; i += 1) apply(addListener, root, [types[i], track, options]);
+  }
+
   // --- Declarations ----------------------------------------------------------------------------------------
 
   function text(value, what, tool) {
@@ -391,6 +436,7 @@
     /** A ticket for code that awaits before requesting: taken while the event is handled, valid TICKET_MS. */
     function ticket(event) {
       requireHandledInput(event);
+      pressOf(event); // placed now, while it is handled, not when the ticket is spent
       const issued = freeze({});
       apply(WeakMapSet, tickets, [issued, freeze({ event, expires: now() + TICKET_MS })]);
       return issued;
@@ -409,10 +455,12 @@
       const held = typeof trigger === 'object' && trigger !== null ? apply(WeakMapGet, tickets, [trigger]) : undefined;
       if (held) event = held.event;
       else requireHandledInput(trigger);
-      let spent = apply(WeakMapGet, spentOnEvent, [event]);
+      // The budget is the press's, not the event's: one click fires several events the guard accepts.
+      const press = pressOf(event);
+      let spent = apply(WeakMapGet, spentOnPress, [press]);
       if (!spent) {
         spent = new Map_();
-        apply(WeakMapSet, spentOnEvent, [event, spent]);
+        apply(WeakMapSet, spentOnPress, [press, spent]);
       }
       const t = now();
       const record = apply(MapGet, spent, [entry.key]);
@@ -427,8 +475,8 @@
         throw new OGameRequestGuardError(
           tool,
           entry.series === 1
-            ? `${entry.key} was already requested for this event`
-            : `${entry.key} allows a series of ${entry.series} requests per event, all of them used`,
+            ? `${entry.key} was already requested for this press`
+            : `${entry.key} allows a series of ${entry.series} requests per press, all of them used`,
         );
       }
       if (t - record.last < SERIES_GAP_MS) throw new OGameRequestGuardError(tool, `requests in a series must be at least ${SERIES_GAP_MS} ms apart`);
