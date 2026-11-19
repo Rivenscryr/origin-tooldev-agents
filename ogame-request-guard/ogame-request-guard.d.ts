@@ -1,4 +1,4 @@
-// Types for OGame Request Guard 1.0.0 (ogame-request-guard.js). The guard itself ships as its own unbundled file;
+// Types for OGame Request Guard 1.1.0 (ogame-request-guard.js). The guard itself ships as its own unbundled file;
 // tools written in TypeScript reference these types and read the guard from globalThis.
 
 declare namespace OGameRequestGuard {
